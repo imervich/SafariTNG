@@ -8,8 +8,9 @@
 
 #import "ViewController.h"
 
-@interface ViewController ()
+@interface ViewController () <UIWebViewDelegate, UITextFieldDelegate, UIAlertViewDelegate>
 
+@property (weak, nonatomic) IBOutlet UIWebView *myWebView;
 @end
 
 @implementation ViewController
@@ -17,13 +18,44 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    self.homepageUrlString = @"http://www.mobilemakers.co";
+    [self loadUrlString:self.homepageUrlString];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)loadUrlString:(NSString *)urlString {
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+    [self.myWebView loadRequest:urlRequest];
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    NSLog(@"Loading...");
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSLog(@"Loaded");
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [self loadUrlString:textField.text];
+    [textField resignFirstResponder];
+    return YES;
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    UIAlertView *alertView = [[UIAlertView alloc] init];
+    alertView.title = @"ERROR";
+    alertView.message = error.localizedDescription;
+    alertView.delegate = self;
+    [alertView addButtonWithTitle:@"That stinks"];
+    [alertView addButtonWithTitle:@"Go home"];
+    [alertView show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        [self loadUrlString:self.homepageUrlString];
+    }
 }
 
 @end
